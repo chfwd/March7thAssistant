@@ -23,6 +23,7 @@ class DivergentUniverse:
         self.end_loop: bool = False  # 是否结束主循环
         self.stage_finish: bool = False  # 是否完成当前阶段
         self.unsupported_area: bool = False  # 是否遇到暂不支持区域
+        self.used_skill: bool = False  # 是否在使用过技能
 
     @staticmethod
     def _get_count_config(cycle: Literal["daily", "weekly"]):
@@ -705,6 +706,35 @@ class DivergentUniverse:
         self.process_leave()
 
     def process_battle_stage(self):
+        if not auto.find_element("./assets/images/screen/divergent_universe/sw_skill.png", "image", 0.8, crop=(1600 / 1920, 300 / 1080, 100 / 1920, 100 / 1080)):
+            log.info("未检测到秘技，尝试使用")
+            auto.press_key("e")
+        if "战斗" in self.current_stage:
+            log.info("尝试使用秘技快速处理战斗")
+            enemy_crop = (675 / 1920, 41 / 1080, 274 / 1920, 37 / 1080)
+            start_time = time.monotonic()
+            auto.press_key_down("w")
+            time.sleep(3)
+            auto.press_key_up("w")
+            for _ in range(4):
+                self.check_click_close()
+                self.check_title()
+                time.sleep(0.5)
+            for _ in range(100):
+                if self.check_click_close() or self.check_title():
+                    time.sleep(5)
+                else:
+                    break
+            if self.process_random_door():
+                return
+            log.info("使用秘技快速处理战斗失败，尝试正常方法")
+            # while time.monotonic() - start_time < 30:  # 最多等待30秒
+            #     if auto.find_element("./assets/images/screen/divergent_universe/enemy.png", "image", 0.9, crop=enemy_crop):
+            #         log.info("检测到敌对目标")
+            #     else:
+            #         log.info("未检测到敌对目标")
+            #         if self.process_random_door(timeout=10):
+            #             return
         for _ in range(3):
             time.sleep(2)
             enemy_crop = (675 / 1920, 41 / 1080, 274 / 1920, 37 / 1080)
@@ -719,6 +749,8 @@ class DivergentUniverse:
                     break
             else:
                 log.info("未检测到敌对目标")
+                if self.process_random_door(timeout=10):
+                    return
             time.sleep(0.8)
             auto.press_key_up("w")
             if not cfg.cloud_game_enable and not cfg.weekly_divergent_stable_mode:
