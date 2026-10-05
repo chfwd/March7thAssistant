@@ -48,6 +48,7 @@ dependencies = [
     "onnxruntime==1.26.0; sys_platform == 'darwin' or sys_platform == 'linux'",
     "openvino==2026.1.0",
     "py7zr==1.1.0",
+    "mcp==1.28.1",
 ]
 
 [dependency-groups]
@@ -79,6 +80,7 @@ docker = [
     "rapidocr==3.8.1",
     "onnxruntime==1.26.0",
     "openvino==2026.1.0",
+    "mcp==1.28.1",
 ]
 
 build = [
